@@ -1,0 +1,455 @@
+node n0 {
+    type pc
+    network-config {
+	hostname pc1
+	!
+	interface eth0
+	 ip address 10.0.0.20/24
+	 ipv6 address fc00::20/64
+	 mac address 42:00:aa:00:00:04
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	ip route 0.0.0.0/0 10.0.0.1
+	!
+	ipv6 route ::/0 fc00::1
+	!
+    }
+    canvas c0
+    iconcoords {360 240}
+    labelcoords {360 271}
+    interface-peer {eth0 n2}
+}
+
+node n1 {
+    type pc
+    network-config {
+	hostname pc2
+	!
+	interface eth0
+	 ip address 10.0.0.21/24
+	 ipv6 address fc00::21/64
+	 mac address 42:00:aa:00:00:05
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	ip route 0.0.0.0/0 10.0.0.1
+	!
+	ipv6 route ::/0 fc00::1
+	!
+    }
+    canvas c0
+    iconcoords {384 576}
+    labelcoords {384 607}
+    interface-peer {eth0 n2}
+    custom-configs {
+        custom-config-id default {
+            custom-command /bin/sh
+            config {
+                ip addr add 127.0.0.1/8 dev lo0
+                ip addr add 10.0.0.21/24 dev eth0
+                ip -6 addr add ::1/128 dev lo0
+                ip -6 addr add fc00::21/64 dev eth0
+                
+                ip route add 0.0.0.0/0 via 10.0.0.1
+                ip -6 route add ::/0 via fc00::1
+                
+            }
+        }
+        custom-config-id testing {
+            custom-command /bin/sh
+            config {
+                ip addr add 10.0.0.215/24 dev eth0
+                
+                
+                ifconfig eth0 10.0.0.215/24
+                echo "Iam HomePC2"> /tmp/x
+                
+            }
+        }
+    }
+    custom-enabled true
+    custom-selected testing
+}
+
+node n2 {
+    type lanswitch
+    network-config {
+	hostname switch1
+	!
+    }
+    canvas c0
+    iconcoords {432 408}
+    labelcoords {432 431}
+    interface-peer {e0 n4}
+    interface-peer {e1 n0}
+    interface-peer {e2 n1}
+    interface-peer {e3 n9}
+}
+
+node n3 {
+    type lanswitch
+    network-config {
+	hostname switch2
+	!
+    }
+    canvas c0
+    iconcoords {864 408}
+    labelcoords {864 431}
+    interface-peer {e0 n5}
+    interface-peer {e1 n7}
+    interface-peer {e2 n8}
+}
+
+node n4 {
+    type router
+    model quagga
+    network-config {
+	hostname router1
+	!
+	interface eth1
+	 ip address 10.0.1.2/24
+	 ipv6 address fc00:1::2/64
+	 mac address 42:00:aa:00:00:02
+	 mtu 300
+	!
+	interface eth0
+	 ip address 10.0.0.1/24
+	 ipv6 address fc00::1/64
+	 mac address 42:00:aa:00:00:00
+	!
+	interface eth2
+	 ip address 10.0.3.2/24
+	 ipv6 address fc00:3::2/64
+	 mac address 42:00:aa:00:00:07
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	router rip
+	 redistribute static
+	 redistribute connected
+	 redistribute ospf
+	 network 0.0.0.0/0
+	!
+    }
+    canvas c0
+    iconcoords {528 288}
+    labelcoords {528 313}
+    interface-peer {eth0 n2}
+    interface-peer {eth1 n5}
+    interface-peer {eth2 n6}
+}
+
+node n5 {
+    type router
+    model quagga
+    network-config {
+	hostname router2
+	!
+	interface eth3
+	 ip address 10.0.5.1/24
+	 ipv6 address fc00:5::1/64
+	 mac address 42:00:aa:00:00:0d
+	!
+	interface eth2
+	 ip address 10.0.4.1/24
+	 ipv6 address fc00:4::1/64
+	 mac address 42:00:aa:00:00:08
+	!
+	interface eth1
+	 ip address 10.0.2.1/24
+	 ipv6 address fc00:2::1/64
+	 mac address 42:00:aa:00:00:03
+	!
+	interface eth0
+	 ip address 10.0.1.1/24
+	 ipv6 address fc00:1::1/64
+	 mac address 42:00:aa:00:00:01
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	router rip
+	 redistribute static
+	 redistribute connected
+	 redistribute ospf
+	 network 0.0.0.0/0
+	!
+	router ripng
+	 redistribute static
+	 redistribute connected
+	 redistribute ospf6
+	 network ::/0
+	!
+    }
+    canvas c0
+    iconcoords {792 288}
+    labelcoords {792 313}
+    interface-peer {eth0 n4}
+    interface-peer {eth1 n3}
+    interface-peer {eth2 n6}
+    interface-peer {eth3 n10}
+}
+
+node n6 {
+    type router
+    model quagga
+    network-config {
+	hostname router3
+	!
+	interface eth1
+	 ip address 10.0.4.2/24
+	 ipv6 address fc00:4::2/64
+	 mac address 42:00:aa:00:00:09
+	!
+	interface eth0
+	 ip address 10.0.3.1/24
+	 ipv6 address fc00:3::1/64
+	 mac address 42:00:aa:00:00:06
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	router rip
+	 redistribute static
+	 redistribute connected
+	 redistribute ospf
+	 network 0.0.0.0/0
+	!
+	router ripng
+	 redistribute static
+	 redistribute connected
+	 redistribute ospf6
+	 network ::/0
+	!
+    }
+    canvas c0
+    iconcoords {648 480}
+    labelcoords {648 505}
+    interface-peer {eth0 n4}
+    interface-peer {eth1 n5}
+}
+
+node n7 {
+    type host
+    network-config {
+	hostname Telnet
+	!
+	interface eth0
+	 ip address 10.0.2.10/24
+	 ipv6 address fc00:2::10/64
+	 mac address 42:00:aa:00:00:0a
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	ip route 0.0.0.0/0 10.0.2.1
+	!
+	ipv6 route ::/0 fc00:2::1
+	!
+    }
+    canvas c0
+    iconcoords {912 216}
+    labelcoords {912 252}
+    services {telnet}
+    interface-peer {eth0 n3}
+    custom-configs {
+        custom-config-id default {
+            custom-command /bin/sh
+            config {
+                ip addr add 127.0.0.1/8 dev lo0
+                ip addr add 10.0.2.10/24 dev eth0
+                ip -6 addr add ::1/128 dev lo0
+                ip -6 addr add fc00:2::10/64 dev eth0
+                
+                ip route add 0.0.0.0/0 via 10.0.2.1
+                ip -6 route add ::/0 via fc00:2::1
+                
+                rpcbind
+                inetd
+                
+            }
+        }
+    }
+    custom-selected default
+}
+
+node n8 {
+    type host
+    network-config {
+	hostname SSH
+	!
+	interface eth0
+	 ip address 10.0.2.11/24
+	 ipv6 address fc00:2::11/64
+	 mac address 42:00:aa:00:00:0b
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	ip route 0.0.0.0/0 10.0.2.1
+	!
+	ipv6 route ::/0 fc00:2::1
+	!
+    }
+    canvas c0
+    iconcoords {960 504}
+    labelcoords {960 540}
+    services {ssh}
+    interface-peer {eth0 n3}
+}
+
+node n9 {
+    type pc
+    network-config {
+	hostname HomePC
+	!
+	interface eth0
+	 ip address 10.0.0.22/24
+	 ipv6 address fc00::22/64
+	 mac address 42:00:aa:00:00:0c
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	ip route 0.0.0.0/0 10.0.0.1
+	!
+	ipv6 route ::/0 fc00::1
+	!
+    }
+    canvas c0
+    iconcoords {240 408}
+    labelcoords {240 439}
+    interface-peer {eth0 n2}
+}
+
+node n10 {
+    type host
+    network-config {
+	hostname host1
+	!
+	interface eth0
+	 ip address 10.0.5.10/24
+	 ipv6 address fc00:5::10/64
+	 mac address 42:00:aa:00:00:0e
+	!
+	interface lo0
+	 type lo
+	 ip address 127.0.0.1/8
+	 ipv6 address ::1/128
+	!
+	ip route 0.0.0.0/0 10.0.5.1
+	!
+	ipv6 route ::/0 fc00:5::1
+	!
+    }
+    canvas c0
+    iconcoords {816 96}
+    labelcoords {816 132}
+    interface-peer {eth0 n5}
+}
+
+link l0 {
+    nodes {n4 n2}
+    bandwidth 0
+}
+
+link l1 {
+    nodes {n5 n4}
+    bandwidth 0
+}
+
+link l2 {
+    delay 50000
+    nodes {n3 n5}
+    bandwidth 0
+}
+
+link l3 {
+    nodes {n0 n2}
+    events {
+	5 bandwidth ramp 128000 8000 2
+	10 delay rand 80000 120000 8
+	15 delay square 100000 200000 10
+	20 ber const 1
+	25 ber const 0
+	30 delay const 0
+	35 bandwidth const 0
+    }
+}
+
+link l4 {
+    nodes {n1 n2}
+    bandwidth 0
+}
+
+link l5 {
+    nodes {n6 n4}
+    bandwidth 0
+}
+
+link l6 {
+    nodes {n5 n6}
+    bandwidth 0
+}
+
+link l7 {
+    nodes {n3 n7}
+    bandwidth 0
+}
+
+link l8 {
+    nodes {n8 n3}
+    bandwidth 0
+}
+
+link l9 {
+    nodes {n2 n9}
+    bandwidth 0
+    events {
+    }
+}
+
+link l10 {
+    nodes {n5 n10}
+    bandwidth 0
+}
+
+canvas c0 {
+    name {Canvas0}
+    size {2000 1000}
+}
+
+option show {
+    interface_names no
+    ip_addresses yes
+    ipv6_addresses yes
+    node_labels yes
+    link_labels yes
+    background_images no
+    annotations yes
+    hostsAutoAssign no
+    grid yes
+    iconSize normal
+    zoom 1.0
+}
+
